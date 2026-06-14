@@ -1,122 +1,127 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import WeatherCard from './components/WeatherCard'
 
 function App() {
-  const [count, setCount] = useState(0)
+	const [inputValue, setInputValue] = useState('')
+	const [cities, setCities] = useState([])
+	const [msg, setMsg] = useState('')
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+	const apiKey = '4d8fb5b93d4af21d66a2948710284366'
 
-      <div className="ticks"></div>
+	const handleSubmit = e => {
+		e.preventDefault()
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+		let inputVal = inputValue
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+		if (cities.length > 0) {
+			const filteredArray = cities.filter(city => {
+				let content = ''
+				//athens,gr
+				if (inputVal.includes(',')) {
+					//athens,grrrrrr->invalid country code, so we keep only the first part of inputVal
+					if (inputVal.split(',')[1].length > 2) {
+						inputVal = inputVal.split(',')[0]
+						content = city.name.toLowerCase()
+					} else {
+						content = `${city.name.toLowerCase()},${city.sys.country.toLowerCase()}`
+					}
+				} else {
+					//athens
+					content = city.name.toLowerCase()
+				}
+				return content === inputVal.toLowerCase()
+			})
+
+			if (filteredArray.length > 0) {
+				setMsg(
+					`You already know the weather for ${filteredArray[0].name} ...otherwise be more specific by providing the country code as well 😉`
+				)
+				setInputValue('')
+				return
+			}
+		}
+
+		//ajax here
+		const url = `https://api.openweathermap.org/data/2.5/weather?q=${inputVal}&appid=${apiKey}&units=metric`
+
+		fetch(url)
+			.then(response => response.json())
+			.then(data => {
+				const { main, name, sys, weather, id } = data
+				const iconUrl = `https://s3-us-west-2.amazonaws.com/s.cdpn.io/162656/${weather[0]['icon']}.svg`
+
+				setCities(prevCities => [
+					...prevCities,
+					{ id, main, name, sys, weather, iconUrl }
+				])
+				setMsg('')
+			})
+			.catch(() => {
+				setMsg('Please search for a valid city 😩')
+			})
+
+		setInputValue('')
+	}
+
+	return (
+		<>
+			<div class="api">
+				<div class="container">
+					🌞 This demo needs an OpenWeather API key to work.{' '}
+					<a
+						target="_blank"
+						href="https://home.openweathermap.org/users/sign_up"
+					>
+						Get yours here for free!
+					</a>
+				</div>
+			</div>
+			<section className="top-banner">
+				<div className="container">
+					<h1 className="heading">Simple Weather App</h1>
+					<form onSubmit={handleSubmit}>
+						<input
+							type="text"
+							placeholder="Search for a city"
+							autoFocus
+							value={inputValue}
+							onChange={e => setInputValue(e.target.value)}
+						/>
+						<button type="submit">SUBMIT</button>
+						<span className="msg">{msg}</span>
+					</form>
+				</div>
+			</section>
+
+			<section className="ajax-section">
+				<div className="container">
+					<ul className="cities">
+						{cities.map(city => (
+							<WeatherCard
+								key={city.id}
+								city={city}
+							/>
+						))}
+					</ul>
+				</div>
+			</section>
+
+			<footer className="page-footer">
+				<div className="container">
+					<small>
+						Made with <span>&hearts;</span> by{' '}
+						<a
+							href="http://georgemartsoukos.com/"
+							target="_blank"
+							rel="noreferrer"
+						>
+							George Martsoukos
+						</a>
+					</small>
+				</div>
+			</footer>
+		</>
+	)
 }
 
 export default App
