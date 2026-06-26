@@ -8,28 +8,25 @@ function App() {
 
 	const apiKey = '4d8fb5b93d4af21d66a2948710284366'
 
-	const handleSubmit = e => {
+	const handleSubmit = async e => {
 		e.preventDefault()
 
 		let inputVal = inputValue
 
 		if (cities.length > 0) {
 			const filteredArray = cities.filter(city => {
-				let content = ''
-				//athens,gr
 				if (inputVal.includes(',')) {
-					//athens,grrrrrr->invalid country code, so we keep only the first part of inputVal
 					if (inputVal.split(',')[1].length > 2) {
-						inputVal = inputVal.split(',')[0]
-						content = city.name.toLowerCase()
+						const shortInputVal = inputVal.split(',')[0]
+						return city.name.toLowerCase() === shortInputVal.toLowerCase()
 					} else {
-						content = `${city.name.toLowerCase()},${city.sys.country.toLowerCase()}`
+						const content = `${city.name.toLowerCase()},${city.sys.country.toLowerCase()}`
+						return content === inputVal.toLowerCase()
 					}
 				} else {
-					//athens
-					content = city.name.toLowerCase()
+					const content = city.name.toLowerCase()
+					return content === inputVal.toLowerCase()
 				}
-				return content === inputVal.toLowerCase()
 			})
 
 			if (filteredArray.length > 0) {
@@ -41,32 +38,34 @@ function App() {
 			}
 		}
 
-		//ajax here
 		const url = `https://api.openweathermap.org/data/2.5/weather?q=${inputVal}&appid=${apiKey}&units=metric`
 
-		fetch(url)
-			.then(response => response.json())
-			.then(data => {
-				const { main, name, sys, weather, id } = data
-				const iconUrl = `https://s3-us-west-2.amazonaws.com/s.cdpn.io/162656/${weather[0]['icon']}.svg`
+		try {
+			const response = await fetch(url)
+			if (!response.ok) {
+				throw new Error('City not found')
+			}
 
-				setCities(prevCities => [
-					...prevCities,
-					{ id, main, name, sys, weather, iconUrl }
-				])
-				setMsg('')
-			})
-			.catch(() => {
-				setMsg('Please search for a valid city 😩')
-			})
+			const data = await response.json()
+			const { main, name, sys, weather, id } = data
+			const iconUrl = `https://s3-us-west-2.amazonaws.com/s.cdpn.io/162656/${weather[0]['icon']}.svg`
+
+			setCities(prevCities => [
+				...prevCities,
+				{ id, main, name, sys, weather, iconUrl }
+			])
+			setMsg('')
+		} catch {
+			setMsg('Please search for a valid city 😩')
+		}
 
 		setInputValue('')
 	}
 
 	return (
 		<>
-			<div class="api">
-				<div class="container">
+			<div className="api">
+				<div className="container">
 					🌞 This demo needs an OpenWeather API key to work.{' '}
 					<a
 						target="_blank"
