@@ -1,9 +1,28 @@
 import { useEffect, useState } from 'react'
 import { addSavedCity, getSavedCities } from './api.js'
 import AuthModal from './components/auth/AuthModal.jsx'
-import LanguageToggle from './components/language/LanguageToggle.jsx'
 import { translations } from './components/language/translations.js'
+import UserPanel from './components/UserPanel.jsx'
 import WeatherCard from './components/WeatherCard'
+import WeatherControls from './components/WeatherControls.jsx'
+
+const checkDuplicateCity = (cities, inputVal) => {
+	if (cities.length === 0) return false
+
+	return cities.some(city => {
+		if (inputVal.includes(',')) {
+			const [cityName, countryCode] = inputVal
+				.split(',')
+				.map(s => s.trim().toLowerCase())
+			if (countryCode && countryCode.length > 2) {
+				return city.name.toLowerCase() === cityName
+			}
+			const content = `${city.name.toLowerCase()},${city.sys.country.toLowerCase()}`
+			return content === inputVal.toLowerCase()
+		}
+		return city.name.toLowerCase() === inputVal.toLowerCase()
+	})
+}
 
 function App() {
 	const [inputValue, setInputValue] = useState('')
@@ -54,27 +73,10 @@ function App() {
 
 		let inputVal = inputValue
 
-		if (cities.length > 0) {
-			const filteredArray = cities.filter(city => {
-				if (inputVal.includes(',')) {
-					if (inputVal.split(',')[1].length > 2) {
-						const shortInputVal = inputVal.split(',')[0]
-						return city.name.toLowerCase() === shortInputVal.toLowerCase()
-					} else {
-						const content = `${city.name.toLowerCase()},${city.sys.country.toLowerCase()}`
-						return content === inputVal.toLowerCase()
-					}
-				} else {
-					const content = city.name.toLowerCase()
-					return content === inputVal.toLowerCase()
-				}
-			})
-
-			if (filteredArray.length > 0) {
-				setMsg(t.errDuplicate)
-				setInputValue('')
-				return
-			}
+		if (checkDuplicateCity(cities, inputVal)) {
+			setMsg(t.errDuplicate)
+			setInputValue('')
+			return
 		}
 
 		const url = `https://api.openweathermap.org/data/2.5/weather?q=${inputVal}&appid=${apiKey}&units=metric`
@@ -146,61 +148,17 @@ function App() {
 
 	return (
 		<>
-			<div className="user-panel">
-				<div
-					className="container"
-					style={{
-						display: 'flex',
-						justifyContent: 'flex-end',
-						alignItems: 'center',
-						gap: '15px',
-						padding: '10px 0'
-					}}
-				>
-					{currentUser ? (
-						<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-							<span style={{ fontWeight: 'bold', color: '#5cb85c' }}>
-								👤 {currentUser}
-							</span>
-							<button
-								onClick={() => {
-									setCurrentUser(null)
-									setCities([])
-								}}
-								style={{
-									background: '#ff4d4d',
-									color: '#fff',
-									border: 'none',
-									padding: '5px 10px',
-									borderRadius: '4px',
-									cursor: 'pointer'
-								}}
-							>
-								{t.authBtnLogout}
-							</button>
-						</div>
-					) : (
-						<button
-							onClick={() => setIsAuthOpen(true)}
-							style={{
-								background: '#337ab7',
-								color: '#fff',
-								border: 'none',
-								padding: '5px 12px',
-								borderRadius: '4px',
-								cursor: 'pointer',
-								fontWeight: 'bold'
-							}}
-						>
-							{t.authBtnLogin}
-						</button>
-					)}
-					<LanguageToggle
-						lang={lang}
-						onLanguageChange={handleLanguageChange}
-					/>
-				</div>
-			</div>
+			<UserPanel
+				currentUser={currentUser}
+				onLogout={() => {
+					setCurrentUser(null)
+					setCities([])
+				}}
+				onAuthOpen={() => setIsAuthOpen(true)}
+				lang={lang}
+				onLanguageChange={handleLanguageChange}
+				t={t}
+			/>
 
 			<section className="top-banner">
 				<div className="container">
@@ -222,45 +180,11 @@ function App() {
 			<section className="ajax-section">
 				<div className="container">
 					{cities.length > 0 && (
-						<div
-							style={{
-								display: 'flex',
-								justifyContent: 'center',
-								gap: '15px',
-								marginBottom: '20px'
-							}}
-						>
-							<button
-								type="button"
-								onClick={handleUpdateWeather}
-								style={{
-									background: '#5cb85c',
-									color: '#fff',
-									border: 'none',
-									padding: '10px 20px',
-									borderRadius: '5px',
-									cursor: 'pointer',
-									fontWeight: 'bold'
-								}}
-							>
-								{t.updateBtn}
-							</button>
-							<button
-								type="button"
-								onClick={handleClearAll}
-								style={{
-									background: '#ff4d4d',
-									color: '#fff',
-									border: 'none',
-									padding: '10px 20px',
-									borderRadius: '5px',
-									cursor: 'pointer',
-									fontWeight: 'bold'
-								}}
-							>
-								{t.clearBtn}
-							</button>
-						</div>
+						<WeatherControls
+							onUpdate={handleUpdateWeather}
+							onClear={handleClearAll}
+							t={t}
+						/>
 					)}
 					<ul className="cities">
 						{cities.map(city => (
