@@ -75,6 +75,31 @@ function App() {
 		setMsg('')
 	}
 
+	const handleUpdateWeather = async () => {
+		if (cities.length === 0) return
+
+		try {
+			const updatePromises = cities.map(async city => {
+				const url = `https://api.openweathermap.org/data/2.5/weather?q=${city.name}&appid=${apiKey}&units=metric`
+				const response = await fetch(url)
+
+				if (!response.ok) return city
+
+				const data = await response.json()
+				const { main, weather } = data
+				const iconUrl = `https://s3-us-west-2.amazonaws.com/s.cdpn.io/162656/${weather[0]['icon']}.svg`
+
+				return { ...city, main, weather, iconUrl }
+			})
+
+			const updatedCities = await Promise.all(updatePromises)
+			setCities(updatedCities)
+			setMsg(t.updateSuccess)
+		} catch {
+			setMsg(t.updateError)
+		}
+	}
+
 	return (
 		<>
 			<div className="api">
@@ -127,9 +152,25 @@ function App() {
 							style={{
 								display: 'flex',
 								justifyContent: 'center',
+								gap: '15px',
 								marginBottom: '20px'
 							}}
 						>
+							<button
+								type="button"
+								onClick={handleUpdateWeather}
+								style={{
+									background: '#5cb85c',
+									color: '#fff',
+									border: 'none',
+									padding: '10px 20px',
+									borderRadius: '5px',
+									cursor: 'pointer',
+									fontWeight: 'bold'
+								}}
+							>
+								{t.updateBtn}
+							</button>
 							<button
 								type="button"
 								onClick={handleClearAll}

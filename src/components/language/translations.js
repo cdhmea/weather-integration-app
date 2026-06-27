@@ -10,7 +10,9 @@ export const translations = {
 		errNotFound: 'Пожалуйста, введите корректное название города 😩',
 		errDuplicate:
 			'Вы уже знаете погоду для этого города... иначе укажите точнее, добавив код страны 😉',
-		clearBtn: 'Очистить всё'
+		clearBtn: 'Очистить всё',
+		updateError: 'Ошибка при обновлении 😩',
+		updateBtn: 'Обновить погоду'
 	},
 	en: {
 		banner: '🌞 This demo needs an OpenWeather API key to work.',
@@ -20,9 +22,11 @@ export const translations = {
 		button: 'SUBMIT',
 		footer: 'Made with',
 		by: 'by',
-		errNotFound: 'Please search for a valid city 😩',
+		errNotFound: 'Please search for a valid city',
 		errDuplicate:
 			'You already know the weather for this city ...otherwise be more specific by providing the country code as well 😉',
-		clearBtn: 'Clear All'
+		clearBtn: 'Clear All',
+		updateError: 'Failed to update weather',
+		updateBtn: 'Update Weather'
 	}
 }
