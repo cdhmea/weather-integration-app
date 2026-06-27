@@ -251,21 +251,113 @@ body {
 	}
 }
 
-/* API Key banner
-–––––––––––––––––––––––––––––––––––––––––––––––––– */
-.api {
-	background: #fffbbc;
+.modal-overlay {
 	position: fixed;
 	top: 0;
 	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(10, 31, 68, 0.85);
+	backdrop-filter: blur(5px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	z-index: 9999;
+}
+
+.modal-content {
+	background: #fff;
+	border-radius: 16px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+	max-width: 380px;
 	width: 100%;
+	padding: 35px;
+	position: relative;
+	color: var(--text_dark);
+}
+
+.modal-close {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	background: none;
+	border: none;
+	font-size: 20px;
+	cursor: pointer;
+	color: var(--text_med);
+}
+
+.modal-title {
+	text-align: center;
+	margin-bottom: 25px;
+	font-size: 1.8rem;
+	font-weight: bold;
+	color: var(--bg_main);
+}
+
+.modal-error {
+	background-color: var(--red);
+	color: #fff;
 	padding: 10px;
+	border-radius: 6px;
+	text-align: center;
+	font-size: 0.9rem;
+	margin-bottom: 20px;
 }
 
-.api a {
+.form-group {
+	margin-bottom: 15px;
+	text-align: left;
+}
+
+.form-group label {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: bold;
+	color: var(--text_med);
+	margin-bottom: 5px;
+	letter-spacing: 0.05em;
+}
+
+.modal-input {
+	width: 100%;
+	padding: 12px !important;
+	border: 1px solid #ccc !important;
+	background: #f8fafc !important;
+	border-radius: 6px !important;
+	font-size: 1rem !important;
+	color: var(--text_dark) !important;
+}
+
+.modal-submit {
+	width: 100%;
+	background: var(--red) !important;
+	color: #fff !important;
+	padding: 12px;
+	border-radius: 6px;
+	font-weight: bold;
+	font-size: 1rem;
+	margin-top: 10px;
+	transition: background 0.2s;
+}
+
+.modal-submit:hover {
+	background: var(--darkred) !important;
+}
+
+.modal-switch-container {
+	margin-top: 20px;
+	text-align: center;
+	border-top: 1px solid #e1e6eb;
+	padding-top: 15px;
+}
+
+.modal-switch-btn {
+	background: none;
+	border: none;
+	color: var(--orange);
+	cursor: pointer;
+	font-size: 0.9rem;
 	text-decoration: underline;
-}
-
-.api a:hover {
-	text-decoration: none;
 }

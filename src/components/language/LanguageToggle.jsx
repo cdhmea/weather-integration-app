@@ -1,22 +1,29 @@
 function LanguageToggle({ lang, onLanguageChange }) {
 	return (
-		<div className="lang-buttons">
+		<div
+			className="lang-toggle"
+			style={{ color: '#fff' }}
+		>
 			<button
-				type="button"
 				onClick={() => onLanguageChange('ru')}
 				style={{
 					fontWeight: lang === 'ru' ? 'bold' : 'normal',
-					marginRight: '5px',
+					color: '#fff',
+					background: 'none',
+					border: 'none',
 					cursor: 'pointer'
 				}}
 			>
 				RU
 			</button>
+			<span style={{ color: '#fff' }}> | </span>
 			<button
-				type="button"
 				onClick={() => onLanguageChange('en')}
 				style={{
 					fontWeight: lang === 'en' ? 'bold' : 'normal',
+					color: '#fff',
+					background: 'none',
+					border: 'none',
 					cursor: 'pointer'
 				}}
 			>
