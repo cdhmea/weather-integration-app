@@ -1,12 +1,17 @@
 import { useState } from 'react'
+import LanguageToggle from './components/language/LanguageToggle.jsx'
+import { translations } from './components/language/translations.js'
 import WeatherCard from './components/WeatherCard'
 
 function App() {
 	const [inputValue, setInputValue] = useState('')
 	const [cities, setCities] = useState([])
 	const [msg, setMsg] = useState('')
+	const [lang, setLang] = useState('ru')
 
 	const apiKey = '4d8fb5b93d4af21d66a2948710284366'
+
+	const t = translations[lang]
 
 	const handleSubmit = async e => {
 		e.preventDefault()
@@ -30,9 +35,7 @@ function App() {
 			})
 
 			if (filteredArray.length > 0) {
-				setMsg(
-					`You already know the weather for ${filteredArray[0].name} ...otherwise be more specific by providing the country code as well 😉`
-				)
+				setMsg(t.errDuplicate)
 				setInputValue('')
 				return
 			}
@@ -56,37 +59,62 @@ function App() {
 			])
 			setMsg('')
 		} catch {
-			setMsg('Please search for a valid city 😩')
+			setMsg(t.errNotFound)
 		}
 
 		setInputValue('')
 	}
 
+	const handleLanguageChange = newLang => {
+		setLang(newLang)
+		setMsg('')
+	}
+
+	const handleClearAll = () => {
+		setCities([])
+		setMsg('')
+	}
+
 	return (
 		<>
 			<div className="api">
-				<div className="container">
-					🌞 This demo needs an OpenWeather API key to work.{' '}
-					<a
-						target="_blank"
-						href="https://home.openweathermap.org/users/sign_up"
-					>
-						Get yours here for free!
-					</a>
+				<div
+					className="container"
+					style={{
+						display: 'flex',
+						justifyContent: 'space-between',
+						alignItems: 'center'
+					}}
+				>
+					<span>
+						{t.banner}{' '}
+						<a
+							target="_blank"
+							href="https://home.openweathermap.org/users/sign_up"
+						>
+							{t.link}
+						</a>
+					</span>
+
+					<LanguageToggle
+						lang={lang}
+						onLanguageChange={handleLanguageChange}
+					/>
 				</div>
 			</div>
+
 			<section className="top-banner">
 				<div className="container">
-					<h1 className="heading">Simple Weather App</h1>
+					<h1 className="heading">{t.heading}</h1>
 					<form onSubmit={handleSubmit}>
 						<input
 							type="text"
-							placeholder="Search for a city"
+							placeholder={t.placeholder}
 							autoFocus
 							value={inputValue}
 							onChange={e => setInputValue(e.target.value)}
 						/>
-						<button type="submit">SUBMIT</button>
+						<button type="submit">{t.button}</button>
 						<span className="msg">{msg}</span>
 					</form>
 				</div>
@@ -94,6 +122,31 @@ function App() {
 
 			<section className="ajax-section">
 				<div className="container">
+					{cities.length > 0 && (
+						<div
+							style={{
+								display: 'flex',
+								justifyContent: 'center',
+								marginBottom: '20px'
+							}}
+						>
+							<button
+								type="button"
+								onClick={handleClearAll}
+								style={{
+									background: '#ff4d4d',
+									color: '#fff',
+									border: 'none',
+									padding: '10px 20px',
+									borderRadius: '5px',
+									cursor: 'pointer',
+									fontWeight: 'bold'
+								}}
+							>
+								{t.clearBtn}
+							</button>
+						</div>
+					)}
 					<ul className="cities">
 						{cities.map(city => (
 							<WeatherCard
@@ -108,7 +161,7 @@ function App() {
 			<footer className="page-footer">
 				<div className="container">
 					<small>
-						Made with <span>&hearts;</span> by{' '}
+						{t.footer} <span>&hearts;</span> {t.by}{' '}
 						<a
 							href="http://georgemartsoukos.com/"
 							target="_blank"
