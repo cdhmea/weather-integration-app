@@ -154,7 +154,10 @@ app.post('/api/login', async (req, res) => {
 		res.setCookie('session_id', sessionToken, {
 			path: '/',
 			httpOnly: true,
-			maxAge: 86400
+			maxAge: 86400,
+			secure: true,
+			sameSite: 'none',
+			partitioned: true
 		})
 
 		return res.send({ username })
