@@ -199,16 +199,7 @@ function App() {
 
 			<footer className="page-footer">
 				<div className="container">
-					<small>
-						{t.footer} <span>&hearts;</span> {t.by}{' '}
-						<a
-							href="http://georgemartsoukos.com/"
-							target="_blank"
-							rel="noreferrer"
-						>
-							George Martsoukos
-						</a>
-					</small>
+					<small>{t.footerBase}</small>
 				</div>
 			</footer>
 

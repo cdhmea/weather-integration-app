@@ -3,8 +3,8 @@ export const translations = {
 		heading: 'Простой прогноз погоды',
 		placeholder: 'Поиск города:',
 		button: 'Отправить',
-		footer: 'Сделано с',
-		by: 'автором',
+		footerBase:
+			'Разработано в рамках производственной практики на базе шаблона George Martsoukos',
 		errNotFound: 'Пожалуйста, введите корректное название города 😩',
 		errDuplicate:
 			'Вы уже знаете погоду для этого города... иначе укажите точнее, добавив код страны 😉',
@@ -32,8 +32,8 @@ export const translations = {
 		heading: 'Simple Weather App',
 		placeholder: 'Search for a city',
 		button: 'SUBMIT',
-		footer: 'Made with',
-		by: 'by',
+		footerBase:
+			'Developed for industrial practice based on a template by George Martsoukos',
 		errNotFound: 'Please search for a valid city 😩',
 		errDuplicate:
 			'You already know the weather for this city ...otherwise be more specific by providing the country code as well 😉',
