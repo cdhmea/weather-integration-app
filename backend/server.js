@@ -172,6 +172,28 @@ app.post('/api/logout', async (req, res) => {
 	return res.send({ message: 'Вышли' })
 })
 
+const initDb = async () => {
+	try {
+		await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS cities (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        user_id INT REFERENCES users(id) ON DELETE CASCADE NOT NULL
+      );
+    `)
+		console.log('Таблица готова')
+	} catch (err) {
+		console.error('Ошибка при инициализации бд:', err)
+	}
+}
+
+await initDb()
+
 const start = async () => {
 	try {
 		const currentPort = Number(process.env.PORT) || 3000
