@@ -5,7 +5,6 @@ import fastify from 'fastify'
 import { Pool } from 'pg'
 
 const app = fastify()
-const port = 3000
 
 app.register(fastifyCookie, {
 	secret: 'weather-secret-key'
@@ -155,6 +154,15 @@ app.post('/api/logout', async (req, res) => {
 	return res.send({ message: 'Вышли' })
 })
 
-app.listen({ port }, () => {
-	console.log('Бэкенд погоды запущен на порту 3000')
-})
+const start = async () => {
+	try {
+		const currentPort = Number(process.env.PORT) || 3000
+		await app.listen({ port: currentPort, host: '0.0.0.0' })
+		console.log(`Бэкенд погоды запущен на порту ${currentPort}`)
+	} catch (err) {
+		console.error(err)
+		process.exit(1)
+	}
+}
+
+start()
