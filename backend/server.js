@@ -12,7 +12,7 @@ app.register(fastifyCookie, {
 })
 
 await app.register(cors, {
-	origin: ['https://weather-integration-app.vercel.app'],
+	origin: ['https://weather-integration-app-tan.vercel.app/'],
 	credentials: true
 })
 
