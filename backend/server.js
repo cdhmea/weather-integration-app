@@ -12,8 +12,21 @@ app.register(fastifyCookie, {
 })
 
 await app.register(cors, {
-	origin: ['https://weather-integration-app-tan.vercel.app/'],
-	credentials: true
+	origin: [
+		'https://weather-integration-app.vercel.app',
+		'https://weather-integration-app-tan.vercel.app'
+	],
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+	allowedHeaders: [
+		'Origin',
+		'X-Requested-With',
+		'Accept',
+		'Content-Type',
+		'Authorization'
+	],
+	credentials: true,
+	preflightContinue: false,
+	optionsSuccessStatus: 204
 })
 
 const sessions = {}
