@@ -1,4 +1,5 @@
 import fastifyCookie from '@fastify/cookie'
+import cors from '@fastify/cors'
 import crypto from 'crypto'
 import 'dotenv/config'
 import fastify from 'fastify'
@@ -10,14 +11,18 @@ app.register(fastifyCookie, {
 	secret: 'weather-secret-key'
 })
 
+await app.register(cors, {
+	origin: ['https://weather-integration-app.vercel.app'],
+	credentials: true
+})
+
 const sessions = {}
 
 const pool = new Pool({
-	host: process.env.DB_HOST,
-	port: Number(process.env.DB_PORT),
-	user: process.env.DB_USER,
-	password: process.env.DB_PASSWORD,
-	database: process.env.DB_NAME
+	connectionString: process.env.DATABASE_URL,
+	ssl: {
+		rejectUnauthorized: false
+	}
 })
 
 app.get('/api/cities', async (req, res) => {
