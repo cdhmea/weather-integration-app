@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import 'dotenv/config'
 import fastify from 'fastify'
 import { Pool } from 'pg'
-
+console.log('DB_USER:', process.env.DB_USER)
 const app = fastify()
 
 app.register(fastifyCookie, {
@@ -31,11 +31,14 @@ await app.register(cors, {
 
 const sessions = {}
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 const pool = new Pool({
-	connectionString: process.env.DATABASE_URL,
-	ssl: {
-		rejectUnauthorized: false
-	}
+	connectionString:
+		process.env.DATABASE_URL ||
+		`postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+
+	ssl: isProduction ? { rejectUnauthorized: false } : false
 })
 
 app.get('/api/cities', async (req, res) => {
