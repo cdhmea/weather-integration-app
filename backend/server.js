@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import 'dotenv/config'
 import fastify from 'fastify'
 import { Pool } from 'pg'
-console.log('DB_USER:', process.env.DB_USER)
+
 const app = fastify()
 
 app.register(fastifyCookie, {
@@ -182,7 +182,14 @@ app.post('/api/logout', async (req, res) => {
 	const token = req.cookies.session_id
 	if (token) delete sessions[token]
 
-	res.setCookie('session_id', '', { path: '/', maxAge: 0 })
+	res.setCookie('session_id', '', {
+		path: '/',
+		maxAge: 0,
+		httpOnly: true,
+		secure: true,
+		sameSite: 'none',
+		partitioned: true
+	})
 	return res.send({ message: 'Вышли' })
 })
 
