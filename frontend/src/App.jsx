@@ -16,7 +16,7 @@ function App() {
 	const { currentUser, setCurrentUser, loading, logout } = useAuth()
 	const [isAuthOpen, setIsAuthOpen] = useState(false)
 
-	const apiKey = '4d8fb5b93d4af21d66a2948710284366'
+	const apiKey = '28056ed67ae39cd8e99b0c0eecf00f05'
 	const t = translations[lang]
 
 	const {
