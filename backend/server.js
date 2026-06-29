@@ -29,8 +29,6 @@ await app.register(cors, {
 	optionsSuccessStatus: 200
 })
 
-const sessions = {}
-
 const isProduction = process.env.NODE_ENV === 'production'
 
 const pool = new Pool({
@@ -41,24 +39,26 @@ const pool = new Pool({
 	ssl: isProduction ? { rejectUnauthorized: false } : false
 })
 
+const getUsernameByToken = async token => {
+	if (!token) return null
+	const result = await pool.query(
+		'SELECT username FROM sessions WHERE token = $1 AND expires_at > NOW()',
+		[token]
+	)
+	return result.rows.length > 0 ? result.rows[0].username : null
+}
+
 app.get('/api/cities', async (req, res) => {
 	try {
-		const token = req.cookies.session_id
-
-		if (!token || !sessions[token]) {
-			return res.send([])
-		}
-
-		const username = sessions[token]
+		const username = await getUsernameByToken(req.cookies.session_id)
+		if (!username) return res.send([])
 
 		const result = await pool.query(
-			`SELECT c.id, c.name 
-			FROM cities c 
-			JOIN users u ON c.user_id = u.id 
-			WHERE u.username = $1`,
+			`SELECT c.id, c.name FROM cities c 
+       JOIN users u ON c.user_id = u.id 
+       WHERE u.username = $1`,
 			[username]
 		)
-
 		return res.send(result.rows)
 	} catch (e) {
 		console.error(e)
@@ -68,15 +68,10 @@ app.get('/api/cities', async (req, res) => {
 
 app.post('/api/cities', async (req, res) => {
 	try {
-		const token = req.cookies.session_id
+		const username = await getUsernameByToken(req.cookies.session_id)
+		if (!username) return res.status(401).send({ message: 'Не авторизован' })
 
-		if (!token || !sessions[token]) {
-			return res.status(401).send({ message: 'Не авторизован' })
-		}
-
-		const username = sessions[token]
 		const { name } = req.body
-
 		const userResult = await pool.query(
 			'SELECT id FROM users WHERE username = $1',
 			[username]
@@ -84,12 +79,10 @@ app.post('/api/cities', async (req, res) => {
 		if (userResult.rows.length === 0) return res.status(404).send()
 
 		const userId = userResult.rows[0].id
-
 		await pool.query('INSERT INTO cities (name, user_id) VALUES ($1, $2)', [
 			name,
 			userId
 		])
-
 		return res.status(201).send({ message: 'Город добавлен в базу' })
 	} catch (e) {
 		console.error(e)
@@ -99,12 +92,10 @@ app.post('/api/cities', async (req, res) => {
 
 app.delete('/api/cities/:id', async (req, res) => {
 	try {
-		const token = req.cookies.session_id
-		if (!token || !sessions[token]) return res.status(401).send()
+		const username = await getUsernameByToken(req.cookies.session_id)
+		if (!username) return res.status(401).send()
 
-		const { id } = req.params
-
-		await pool.query('DELETE FROM cities WHERE id = $1', [id])
+		await pool.query('DELETE FROM cities WHERE id = $1', [req.params.id])
 		return res.send({ message: 'Город удален' })
 	} catch (e) {
 		console.error(e)
@@ -115,18 +106,15 @@ app.delete('/api/cities/:id', async (req, res) => {
 app.post('/api/register', async (req, res) => {
 	try {
 		const { username, password } = req.body
-
-		if (!username || !password) {
+		if (!username || !password)
 			return res.status(400).send({ message: 'Заполните поля' })
-		}
 
 		const userCheck = await pool.query(
 			'SELECT * FROM users WHERE username = $1',
 			[username]
 		)
-		if (userCheck.rows.length > 0) {
+		if (userCheck.rows.length > 0)
 			return res.status(400).send({ message: 'Логин занят' })
-		}
 
 		await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [
 			username,
@@ -142,7 +130,6 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
 	try {
 		const { username, password } = req.body
-
 		const result = await pool.query('SELECT * FROM users WHERE username = $1', [
 			username
 		])
@@ -152,7 +139,11 @@ app.post('/api/login', async (req, res) => {
 		}
 
 		const sessionToken = 'sess_' + crypto.randomBytes(16).toString('hex')
-		sessions[sessionToken] = username
+
+		await pool.query('INSERT INTO sessions (token, username) VALUES ($1, $2)', [
+			sessionToken,
+			username
+		])
 
 		res.setCookie('session_id', sessionToken, {
 			path: '/',
@@ -171,16 +162,16 @@ app.post('/api/login', async (req, res) => {
 })
 
 app.get('/api/check-auth', async (req, res) => {
-	const token = req.cookies.session_id
-	if (token && sessions[token]) {
-		return res.send({ username: sessions[token] })
-	}
+	const username = await getUsernameByToken(req.cookies.session_id)
+	if (username) return res.send({ username })
 	return res.status(401).send({ message: 'Не авторизован' })
 })
 
 app.post('/api/logout', async (req, res) => {
 	const token = req.cookies.session_id
-	if (token) delete sessions[token]
+	if (token) {
+		await pool.query('DELETE FROM sessions WHERE token = $1', [token])
+	}
 
 	res.setCookie('session_id', '', {
 		path: '/',
@@ -205,6 +196,11 @@ const initDb = async () => {
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         user_id INT REFERENCES users(id) ON DELETE CASCADE NOT NULL
+      );
+			CREATE TABLE IF NOT EXISTS sessions (
+        token VARCHAR(255) PRIMARY KEY,
+        username VARCHAR(50) NOT NULL,
+        expires_at TIMESTAMP DEFAULT (NOW() + INTERVAL '1 day')
       );
     `)
 		console.log('Таблица готова')

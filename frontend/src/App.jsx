@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { addSavedCity, checkAuth } from './api.js'
+import { addSavedCity, checkAuth, logoutUser } from './api.js'
 import AuthModal from './components/auth/AuthModal.jsx'
 import { translations } from './components/language/translations.js'
 import UserPanel from './components/UserPanel.jsx'
-import WeatherCard from './components/weather/WeatherCard.jsx'
-import WeatherControls from './components/weather/WeatherControls.jsx'
-import { checkDuplicateCity } from './components/weather/weatherDupblicate.js'
 import { useWeather } from './hooks/useWeather.js'
+import WeatherCard from './weather/WeatherCard.jsx'
+import WeatherControls from './weather/WeatherControls.jsx'
+import { checkDuplicateCity } from './weather/weatherDupblicate.js'
 
 function App() {
 	const [inputValue, setInputValue] = useState('')
@@ -130,14 +130,21 @@ function App() {
 		)
 	}
 
+	const handleLogout = async () => {
+		try {
+			await logoutUser()
+			setCurrentUser(null)
+			setCities([])
+		} catch (err) {
+			console.error('Ошибка при выходе:', err)
+		}
+	}
+
 	return (
 		<>
 			<UserPanel
 				currentUser={currentUser}
-				onLogout={() => {
-					setCurrentUser(null)
-					setCities([])
-				}}
+				onLogout={handleLogout}
 				onAuthOpen={() => setIsAuthOpen(true)}
 				lang={lang}
 				onLanguageChange={handleLanguageChange}
