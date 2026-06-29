@@ -25,8 +25,8 @@ await app.register(cors, {
 		'Authorization'
 	],
 	credentials: true,
-	preflightContinue: false,
-	optionsSuccessStatus: 204
+	preflightContinue: true,
+	optionsSuccessStatus: 200
 })
 
 const sessions = {}
