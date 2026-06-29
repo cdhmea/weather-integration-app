@@ -29,3 +29,7 @@ export async function loginUser(userData) {
 export async function logoutUser() {
 	return await api.post('/api/logout')
 }
+
+export async function checkAuth() {
+	return await api.get('/api/check-auth')
+}

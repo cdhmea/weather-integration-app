@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { addSavedCity, getSavedCities } from './api.js'
+import { addSavedCity, checkAuth, getSavedCities } from './api.js'
 import AuthModal from './components/auth/AuthModal.jsx'
 import { translations } from './components/language/translations.js'
 import UserPanel from './components/UserPanel.jsx'
@@ -29,12 +29,27 @@ function App() {
 	const [cities, setCities] = useState([])
 	const [msg, setMsg] = useState('')
 	const [lang, setLang] = useState('ru')
+	const [loading, setLoading] = useState(true)
 
 	const [currentUser, setCurrentUser] = useState(null)
 	const [isAuthOpen, setIsAuthOpen] = useState(false)
 
 	const apiKey = '4d8fb5b93d4af21d66a2948710284366'
 	const t = translations[lang]
+
+	useEffect(() => {
+		const initAuth = async () => {
+			try {
+				const res = await checkAuth()
+				setCurrentUser(res.data.username)
+			} catch {
+				setCurrentUser(null)
+			} finally {
+				setLoading(false)
+			}
+		}
+		initAuth()
+	}, [])
 
 	useEffect(() => {
 		if (!currentUser) return
@@ -144,6 +159,14 @@ function App() {
 		} catch {
 			setMsg(t.updateError)
 		}
+	}
+
+	if (loading) {
+		return (
+			<div className="loading-container">
+				<p>Загрузка данных...</p>
+			</div>
+		)
 	}
 
 	return (

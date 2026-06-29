@@ -167,6 +167,14 @@ app.post('/api/login', async (req, res) => {
 	}
 })
 
+app.get('/api/check-auth', async (req, res) => {
+	const token = req.cookies.session_id
+	if (token && sessions[token]) {
+		return res.send({ username: sessions[token] })
+	}
+	return res.status(401).send({ message: 'Не авторизован' })
+})
+
 app.post('/api/logout', async (req, res) => {
 	const token = req.cookies.session_id
 	if (token) delete sessions[token]
