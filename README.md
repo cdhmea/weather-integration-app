@@ -18,6 +18,14 @@
 
 ###### https://weather-integration-app-tan.vercel.app/
 
+### Demo Credentials
+
+Для тестирования функционала авторизации вы можете использовать следующие
+данные:
+
+- **Username:** `maksim`
+- **Password:** `123`
+
 ### Демонстрация функционала приложения
 
 [Видео](docs/demo.mp4)
