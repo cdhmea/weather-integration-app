@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
-import { addSavedCity, checkAuth, getSavedCities } from './api.js'
+import {
+	addSavedCity,
+	checkAuth,
+	deleteSavedCity,
+	getSavedCities
+} from './api.js'
 import AuthModal from './components/auth/AuthModal.jsx'
 import { translations } from './components/language/translations.js'
 import UserPanel from './components/UserPanel.jsx'
@@ -82,6 +87,17 @@ function App() {
 		}
 		loadDbCities()
 	}, [currentUser])
+
+	const handleDeleteCity = async id => {
+		try {
+			if (currentUser) {
+				await deleteSavedCity(id)
+			}
+			setCities(prev => prev.filter(city => city.id !== id))
+		} catch (err) {
+			console.error('Ошибка при удалении:', err)
+		}
+	}
 
 	const handleSubmit = async e => {
 		e.preventDefault()
@@ -214,6 +230,7 @@ function App() {
 							<WeatherCard
 								key={city.id}
 								city={city}
+								onDelete={handleDeleteCity}
 							/>
 						))}
 					</ul>
